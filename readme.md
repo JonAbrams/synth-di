@@ -1,0 +1,118 @@
+# Synth-DI
+
+A promise-enabled dependency-injection module designed for [Synth](https://github.com/JonAbrams/synth), but can be used for your own projects.
+
+## Status
+
+It doesn't work yet, but ideas and feedback are certainly welcome, just make an issue!
+
+## Usage
+
+Install it.
+
+```
+npm install synth-di
+```
+
+Load it.
+
+```javascript
+var DI = require('synth-di');
+// Create a new dependency system
+var di = new DI();
+```
+
+## What is a service?
+
+A service is a function that can be requested by another service. They are just ordinary JavaScript functions that are registered with Synth-DI.
+
+Each service must have a unique name (unique for your app).
+
+Each service has 0 or more dependencies.
+
+When a service is executed, Synth-DI will invoke its dependencies first, along with its dependencies' dependencies, and so on.
+
+A service declares its dependencies by requesting them as parameters. Unlike ordinary JavaScript functions, this means that the names of the parameters are significant, and their order doesn't matter!
+
+A service need not be a function though (I lied earlier). It can also be a piece of named piece of data that is provided at time of execution.
+
+If a service is not a function, then it can't have any dependencies.
+
+A service can optionally return a promise. If so, the service won't be considered "ready" until the promise resolves. The result of the promise is then passed in to its caller.
+
+## An elaborate Example
+
+Let's say you're writing an [Express](http://expressjs.com) server and want to fetch some data for an admin user, and then send a response. It needs two things: The user (guaranteed to be an admin), and a connection to the DB.
+
+```javascript
+var DI = require('synth-di');
+var di = new DI();
+
+// service name specified as first parameter
+di.register('adminUser', function (user) {
+  if (!user || !user.admin) {
+    throw "The specified user is not an administrator";
+  }
+
+  return user;
+});
+
+// The order you register services doesn't matter
+di.register('user', function (db, authToken) {
+  // The 'req' service is actually an object that will be passed in at time of execution
+  // Returns a promise that returns a user object (or null if no user found)
+  return db.collection('users').find({
+    id: userid
+  });
+});
+
+var dbConnection = require('mongojs')(process.env.MONGO_DB);
+// service name extracted from given named-function
+di.register(function db () {
+  return dbConnection;
+});
+
+// Now that we have our services registered, let's get that admin user and data!
+app.get('/api/users/:userid/secrets', function (req, res) {
+  var authToken = req.cookies.authToken;
+  // passes in the current user's authToken, throws error if not an admin
+  var adminUser = di.exec('adminUser', { authToken: authToken });
+
+  var db = di.exec('db'); // Gets the db connection
+
+  // Send back the requested data
+  db.collection('secrets').findAll({ user_id: user.id }, function (err, data) {
+    res.send(data);
+  });
+});
+```
+
+## API
+
+### di.register([optional serviceName:String], [service:Function])
+
+Registers a service/function that can be used by another service/function.
+
+The service name can be specified as the first parameter, or as the name of the function passed in.
+
+### di.exec([serviceName:String], [optional services:Object])
+
+Executes the specified service. The requested service should already be registered before executing it.
+
+
+#### The optional 2nd paramter
+An optional 2nd parameter can be provided to provide service dependencies at execution time (overriding already registered services).
+
+The keys are the names of the services, and the values are passed in as those services, untouched.
+
+Unlike a registered service, if a value is a function, it will NOT be invoked first, the function itself will be passed in.
+
+## License
+
+MIT
+
+## Credit
+
+- This project was created by Jon Abrams ([Twitter](https://twitter.com/JonathanAbrams) | [GitHub](https://github.com/JonAbrams)).
+- Thanks to [Mikael Møller](https://github.com/mikaelhm) for his feedback on Synth which [lead to this project](https://github.com/JonAbrams/synth/issues/39#issuecomment-50677052).
+- Thanks to the AngularJS project for inspiring this version of dependency injection.

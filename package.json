@@ -1,0 +1,21 @@
+{
+  "name": "synth-di",
+  "version": "0.3.0-not-working-yet",
+  "author": "Jon Abrams <jon@jonabrams.com>",
+  "description": "A promise-enabled dependency-injection module designed for Synth, but can be used for your own projects.",
+  "dependencies": {
+    "bluebird": "^1.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^1.20.0",
+    "should": "^2.1.0"
+  },
+  "repository": "git://github.com/JonAbrams/synth-api",
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "main": "main.js"
+}
