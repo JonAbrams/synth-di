@@ -34,20 +34,21 @@ describe('synth-di', function () {
     });
 
     it('uses registered services', function () {
-      di.exec('superman').should.eql('true and just');
+      return di.exec('superman').then(function (res) {
+        res.should.eql('true and just');
+      });
     });
 
     it('uses given services when executed', function () {
-      di.exec('superman', {
+      return di.exec('superman', {
         justice: 'just and undocumented American'
-      }).should.eql('true and just and undocumented American');
+      }).then(function (res) {
+        res.should.eql('true and just and undocumented American');
+      });
     });
 
     it('calls a given service only once', function () {
       var batarangs = 0;
-      di.register(function batman (batarang, smokePellet) {
-        return batarang + " " + smokePellet;
-      });
       di.register(function smokePellet (batarang) {
         return batarang;
       });
@@ -55,16 +56,20 @@ describe('synth-di', function () {
         batarangs++;
         return "Bang";
       });
-      di.exec('batman').should.eql("Bang Bang");
-      batarangs.should.eql(1);
+      return di.exec(function batman (batarang, smokePellet) {
+        return batarang + " " + smokePellet;
+      }).then(function (res) {
+        res.should.eql("Bang Bang");
+        batarangs.should.eql(1);
+      });
     });
 
-    it('throws when cycle detected', function () {
+    it('throws when cycle occurs', function () {
       di.register(function justice (truth) { return 'just'; });
       di.register(function truth (justice) { return true; });
       (function () {
         di.exec('superman');
-      }).should.throw("Service dependency cycle detected for truth");
+      }).should.throw("Maximum call stack size exceeded");
     });
   });
 });

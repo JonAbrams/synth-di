@@ -1,4 +1,5 @@
-var utils = require('./utils');
+var utils = require('./utils'),
+    Promise = require('bluebird');
 
 var DI = module.exports = function DI () {
   this.services = [];
@@ -20,7 +21,7 @@ DI.prototype.register = function (name, func) {
   this.services.push(service);
 };
 
-DI.prototype.exec = function (name, servicesObj) {
+DI.prototype.exec = function (nameOrService, servicesObj) {
   servicesObj = servicesObj || {};
   var customServices = Object.keys(servicesObj).map(function (serviceName) {
     return new Service(serviceName, function () {
@@ -30,12 +31,17 @@ DI.prototype.exec = function (name, servicesObj) {
 
   services = customServices.concat(this.services);
 
-  var service = services.filter(function (service) {
-    return service.name === name;
-  })[0];
+  var service;
+  if (typeof nameOrService === 'string') {
+    service = services.filter(function (service) {
+      return service.name === nameOrService;
+    })[0];
 
-  if (service === undefined) {
-    throw new Error(name + " doesn't appear to be a registerd service.");
+    if (service === undefined) {
+      throw new Error(nameOrService + " doesn't appear to be a registerd service.");
+    }
+  } else if (typeof nameOrService === 'function') {
+    service = new Service(utils.getNameFromFunc(nameOrService), nameOrService);
   }
 
   return service.resolve(services);
@@ -54,22 +60,23 @@ Service.prototype.resolve = function (services) {
   return (function resolve (self) {
     var dependencies = [];
     self.dependencyNames.forEach(function (serviceName) {
+      // Check if service has yet to be resolved
       if ( !results.hasOwnProperty(serviceName) ) {
+        // Find the request service
         var service = services.filter(function (service) {
           return service.name === serviceName;
         })[0];
         if (service === undefined) {
           throw new Error(serviceName + " doesn't appear to be a registered service.");
         }
-        if (callStack.indexOf(serviceName) !== -1) {
-          throw new Error("Service dependency cycle detected for " + serviceName);
-        }
-        callStack.push(serviceName);
-        results[serviceName] = resolve(service);
+        // Resolve this service, then record the results
+        results[serviceName]= resolve(service);
       }
       dependencies.push(results[serviceName]);
     });
 
-    return self.func.apply(self, dependencies);
-  })(this, services);
+    return Promise.all(dependencies).then(function (dependencies) {
+      return self.func.apply(self, dependencies);
+    });
+  })(this);
 };

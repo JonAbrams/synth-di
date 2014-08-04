@@ -24,21 +24,19 @@ var di = new DI();
 
 ## What is a service?
 
-A service is a function that can be requested by another service. They are just ordinary JavaScript functions that are registered with Synth-DI.
+A service is a function that can be requested by another service.
 
-Each service must have a unique name (unique for your app).
+They're just ordinary JS functions, except:
 
-Each service has 0 or more dependencies.
-
-When a service is executed, Synth-DI will invoke its dependencies first, along with its dependencies' dependencies, and so on.
-
-A service declares its dependencies by requesting them as parameters. Unlike ordinary JavaScript functions, this means that the names of the parameters are significant, and their order doesn't matter!
-
-A service need not be a function though (I lied earlier). It can also be a piece of named piece of data that is provided at time of execution.
-
-If a service is not a function, then it can't have any dependencies.
-
-A service can optionally return a promise. If so, the service won't be considered "ready" until the promise resolves. The result of the promise is then passed in to its caller.
+- Each service must have a unique name (unique for your app), unless being executed immediately.
+- Each service has 0 or more dependencies.
+- When a service is executed, Synth-DI will invoke its dependencies first, along with its dependencies' dependencies, and so on.
+- A service declares its dependencies by requesting them as parameters. Unlike ordinary JavaScript functions, this means that the names of the parameters are significant, and their order doesn't matter!
+- A service need not be a function though (I lied earlier). It can also be a named piece of data that is provided at time of execution.
+- If a service is not a function, then it can't have any dependencies.
+- A service can optionally return a promise. If so, the service won't be considered "ready" until the promise resolves. The result of the promise is then passed in to its caller.
+- When a service is executed, a promise is always returned.
+- Each service is only called once per execution. So if two services `A and B` depend on `C`, `C` is resolved once and returned to both A and B.
 
 ## An elaborate Example
 
@@ -75,14 +73,12 @@ di.register(function db () {
 // Now that we have our services registered, let's get that admin user and data!
 app.get('/api/users/:userid/secrets', function (req, res) {
   var authToken = req.cookies.authToken;
-  // passes in the current user's authToken, throws error if not an admin
-  var adminUser = di.exec('adminUser', { authToken: authToken });
-
-  var db = di.exec('db'); // Gets the db connection
-
-  // Send back the requested data
-  db.collection('secrets').findAll({ user_id: user.id }, function (err, data) {
-    res.send(data);
+  // Execute an anonymous service that depends on adminUser and db services
+  di.exec(function (adminUser, db) {
+    // Send back the requested data
+    db.collection('secrets').findAll({ user_id: user.id }, function (err, data) {
+      res.send(data);
+    });
   });
 });
 ```
@@ -99,6 +95,7 @@ The service name can be specified as the first parameter, or as the name of the 
 
 Executes the specified service. The requested service should already be registered before executing it.
 
+It returns a promise that then returns the result of the call.
 
 #### The optional 2nd paramter
 An optional 2nd parameter can be provided to provide service dependencies at execution time (overriding already registered services).
