@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "codeclimate-test-reporter": "0.0.3",
+    "istanbul": "^0.3.0",
     "mocha": "^1.20.0",
     "should": "^2.1.0"
   },
