@@ -2,9 +2,9 @@
 
 A promise-enabled dependency-injection module designed for [Synth](https://github.com/JonAbrams/synth), but can be used for your own projects.
 
-## Status
-
-It doesn't work yet, but ideas and feedback are certainly welcome, just make an issue!
+[![Build Status](https://travis-ci.org/JonAbrams/synth-di.svg?branch=master)](https://travis-ci.org/JonAbrams/synth-di)
+[![Code Climate](https://codeclimate.com/github/JonAbrams/synth-di/badges/gpa.svg)](https://codeclimate.com/github/JonAbrams/synth-di)
+[![Test Coverage](https://codeclimate.com/github/JonAbrams/synth-di/badges/coverage.svg)](https://codeclimate.com/github/JonAbrams/synth-di)
 
 ## Usage
 
