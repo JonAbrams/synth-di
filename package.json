@@ -1,6 +1,6 @@
 {
   "name": "synth-di",
-  "version": "0.3.0-not-working-yet",
+  "version": "0.3.0",
   "author": "Jon Abrams <jon@jonabrams.com>",
   "description": "A promise-enabled dependency-injection module designed for Synth, but can be used for your own projects.",
   "dependencies": {

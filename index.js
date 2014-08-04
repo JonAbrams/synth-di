@@ -47,7 +47,7 @@ DI.prototype.exec = function (nameOrService, servicesObj) {
   return service.resolve(services);
 };
 
-var Service = exports.Service = function Service (name, func) {
+var Service = function Service (name, func) {
   this.name = name;
   this.dependencyNames = utils.getParamsFromFunc(func);
   this.func = func;
