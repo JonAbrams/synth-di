@@ -1,5 +1,8 @@
 language: node_js
 node_js:
-  - "0.10"
+- '0.10'
 notifications:
   email: false
+env:
+  global:
+    secure: lLhUE06so+vYjz1ne+vHkIwNzGb7vt6itNi96FqCjPLCvseuie16zKm2/LkoXvAWWjf5L0aaN90lBFX2S5uF4v1d2yUQM+WIR4ovOgQdhhXrArHkIGUZkOEdIVDXwYwX5lGBiuxC+6oZGm2CbwlUZtp4qwcpwCYrtJCfc68E/k4=

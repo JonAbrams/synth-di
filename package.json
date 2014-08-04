@@ -7,6 +7,7 @@
     "bluebird": "^1.0.3"
   },
   "devDependencies": {
+    "codeclimate-test-reporter": "0.0.3",
     "mocha": "^1.20.0",
     "should": "^2.1.0"
   },
