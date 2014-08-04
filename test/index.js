@@ -64,7 +64,7 @@ describe('synth-di', function () {
       });
     });
 
-    it.only('works with promises', function () {
+    it('works with promises', function () {
       var Promise = require('bluebird');
 
       return di.exec(function (justice, truth) {
