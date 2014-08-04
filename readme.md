@@ -91,11 +91,11 @@ Registers a service/function that can be used by another service/function.
 
 The service name can be specified as the first parameter, or as the name of the function passed in.
 
-### di.exec([serviceName:String], [optional services:Object])
+### di.exec([serviceName:String | service:Function], [optional services:Object])
 
-Executes the specified service. The requested service should already be registered before executing it.
+Executes the specified service. Either the name of a registered service can be passed in, or a function can be passed in directly to be immediately executed.
 
-It returns a promise that then returns the result of the call.
+A promise is returned.
 
 #### The optional 2nd paramter
 An optional 2nd parameter can be provided to provide service dependencies at execution time (overriding already registered services).
